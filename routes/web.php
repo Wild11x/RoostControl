@@ -1,4 +1,5 @@
 <?php
+namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Route;
 
@@ -12,14 +13,18 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/login',[AuthController::class, 'index'])->name('login');
+Route::post('/auth/login',[AuthController::class, 'login']);
+Route::post('/auth/logout',[AuthController::class, 'logout']);
 
-Route::get('/', function () {
-    return view('welcome');
+Route::middleware('auth')->group(function(){
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
+    Route::middleware('role:farmer')->prefix('config')->name('config.')->group(function(){
+        Route::get('heater', [ConfigHeaterController::class, 'index']);
+    });
+    Route::middleware('role:admin')->prefix('manage')->name('manage.')->group(function(){
+        Route::resource('users', UserController::class);
+        Route::resource('devices', DeviceController::class);
+    });
 });
-
-Route::get('/signup', function () {
-    return view('auth.signup');
-});
-
-
-

@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DataSensor extends Model {
+class DataSensor extends Model
+{
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      *
@@ -18,5 +21,5 @@ class DataSensor extends Model {
      *
      * @var array
      */
-    protected $fillable = ['device_id', 'temperature', 'humidity', 'light_intensity'];
+    protected $fillable = ['device_id','temperature', 'humidity', 'light_intensity'];
 }
