@@ -16,7 +16,6 @@
                 <i class="ti ti-x fs-8"></i>
             </div>
         </div>
-        <!-- Sidebar navigation-->
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
             <ul id="sidebarnav">
                 <li class="nav-small-cap">
@@ -59,7 +58,7 @@
                     <span class="hide-menu">Admin Menu</span>
                 </li>
                 <li class="sidebar-item">
-                <a class="sidebar-link" href="{{ url('/manage/devices') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ url('/manage/users') }}" aria-expanded="false">
                         <iconify-icon icon="solar:login-3-line-duotone"></iconify-icon>
                         <span class="hide-menu">Manage Users</span>
                     </a>

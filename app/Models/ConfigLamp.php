@@ -15,4 +15,18 @@ class ConfigLamp extends Model
      * @var bool
      */
     public $timestamps = true;
+
+    /**
+     * The data type of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'device_id';
 }

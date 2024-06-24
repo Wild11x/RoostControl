@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Device;
-use App\Models\ConfigHeater;
+use App\Models\ConfigLamp;
 use Illuminate\Support\Facades\Auth;
 
-class ConfigHeaterController extends Controller
+class ConfigLampController extends Controller
 {
     public function index()
     {
         $devices = Device::where('user_id', Auth::user()->id)->get();
         $device_id = session('device_id') ?? $devices->first()->id;
-        $config = ConfigHeater::where('device_id', $device_id)->first();
-        return view('content.config.heater.index', compact('devices', 'config'));
+        $config = ConfigLamp::where('device_id', $device_id)->first();
+        return view('content.config.lamp.index', compact('devices', 'config'));
     }
 
     public function show(Request $request)
@@ -24,7 +24,7 @@ class ConfigHeaterController extends Controller
                 "device_id" => ["required"],
             ]);
 
-            $config = ConfigHeater::where('device_id', $request->device_id)->first();
+            $config = ConfigLamp::where('device_id', $request->device_id)->first();
             return response()->json($config, 200);
         } catch (\Exception $e) {
             return response()->json($e->getMessage(), 500);
@@ -36,20 +36,13 @@ class ConfigHeaterController extends Controller
         try {
             $validated = $request->validate([
                 "device_id" => ["required"],
-                "mode" => ["required", 'in:manual,automatic'],
-                "status" => ['nullable', 'boolean'],
-                "max_temp" => ['nullable', 'integer'],
-                "min_temp" => ['nullable', 'integer']
+                "time_on" => ['nullable', 'date_format:H:i'],
+                "time_off" => ['nullable', 'date_format:H:i']
             ]);
 
-            $config = ConfigHeater::where('device_id', $request->device_id)->first();
-            $config->mode = strtoupper($request->mode);
-            if ($request->mode == "manual") {
-                $config->status = $request->status;
-            } else {
-                $config->max_temp = $request->max_temp;
-                $config->min_temp = $request->min_temp;
-            }
+            $config = ConfigLamp::where('device_id', $request->device_id)->first();
+            $config->time_on = $request->time_on;
+            $config->time_off = $request->time_off;
             $config->save();
 
             toastr()->success("Configuration updated successfully");

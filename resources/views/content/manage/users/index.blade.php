@@ -8,8 +8,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <h5 class="card-title fw-semibold mb-4">Manage Users</h5>
-                <a href={{url('manage/users/create')}} class="btn btn-primary">Tambah Users</a>
-                @csrf
+                <a href="{{ url('manage/users/create') }}" class="btn btn-primary">Add Users</a>
             </div>
             <table class="table table-hover">
                 <thead>
@@ -24,13 +23,13 @@
                     @foreach ($users as $item)
                     <tr>
                         <th>
-                            <img src="{{ asset('images/profile/user-1.jpg') }}" alt="" class="rounded-circle" style="width: 48px">
+                            <img src="@if ($item->avatar) {{ asset('storage/' . $item->avatar) }} @else {{ asset('images/profile/user-1.jpg') }} @endif" alt="" class="rounded-circle" style="width: 48px">
                         </th>
                         <td>{{ $item->name }}</td>
                         <td>{{ $item->email }}</td>
-                        <td>
-                            <a href="{{ url('/manage/users/'. $item->id . '/edit') }}" class="btn btn-secondary">Edit</a>
-                            <a href="#" class="btn btn-danger">Hapus</a>
+                        <td class="d-flex">
+                            <a href="{{ route('manage.users.edit', $item->id) }}" class="btn btn-secondary me-2">Edit</a>
+                            <a href="{{ route('manage.users.destroy', $item->id) }}" class="btn btn-danger" data-confirm-delete="true">Delete</a>
                         </td>
                     </tr>
                     @endforeach

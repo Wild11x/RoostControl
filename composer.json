@@ -15,7 +15,8 @@
         "php-flasher/flasher-sweetalert-laravel": "^1.15",
         "php-flasher/flasher-toastr-laravel": "^1.15",
         "php-mqtt/client": "^2.1",
-        "realrashid/sweet-alert": "^7.1",
+        "php-mqtt/laravel-client": "^1.5",
+        "realrashid/sweet-alert": "^7.2",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-permission": "^6.7"
     },
@@ -71,4 +72,5 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true
+
 }

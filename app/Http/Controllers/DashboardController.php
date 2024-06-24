@@ -9,14 +9,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $dataSensor = DataSensor::orderBy('created_at','desc')->get();
-        return view('content.dashboard.index', compact('dataSensor'));
-    }
-
-    public function show()
-    {
-        $dataSensor = DataSensor::orderBy('created_at','desc')->get();
-        // Your code here to display the dashboard
+        $dataSensor = DataSensor::orderBy('created_at', 'desc')->get();
         return view('content.dashboard.index', compact('dataSensor'));
     }
 }

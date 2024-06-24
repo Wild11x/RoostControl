@@ -21,5 +21,5 @@ class DataSensor extends Model
      *
      * @var array
      */
-    protected $fillable = ['device_id','temperature', 'humidity', 'light_intensity'];
+    protected $fillable = ['device_id', 'temperature', 'humidity', 'light_intensity'];
 }

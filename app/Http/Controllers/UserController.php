@@ -17,6 +17,10 @@ class UserController extends Controller
     {
         $users = User::all();
 
+        // Add alert on delete button
+        $title = 'Delete User!';
+        $text = "Are you sure you want to delete?";
+        confirmDelete($title, $text);
 
         return view('content.manage.users.index', compact('users'));
     }
@@ -55,10 +59,11 @@ class UserController extends Controller
             }
             $user->save();
             $user->assignRole($request->role);
+            toastr()->success("User Created Successfully");
             return redirect()->route('manage.users.index');
         } catch (\Illuminate\Database\QueryException $e) {
             // catch error if users has duplicate email
-
+            toastr()->error($e->getMessage());
             return redirect()->route('manage.users.create');
         }
     }

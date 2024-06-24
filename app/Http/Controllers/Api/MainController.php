@@ -8,6 +8,7 @@ use App\Models\Device;
 use App\Models\ConfigHeater;
 use App\Models\ConfigLamp;
 use App\Models\DataSensor;
+use PhpMqtt\Client\Facades\MQTT;
 
 class MainController extends Controller
 {
@@ -16,14 +17,14 @@ class MainController extends Controller
     {
         $device = Device::find($deviceId);
         $configHeater = ConfigHeater::where('device_id', $deviceId)->first();
-        $configLamp = ConfigLamp::where('device_id',$deviceId)->first();
+        $configLamp = ConfigLamp::where('device_id', $deviceId)->first();
         # Perlu function untuk cek jam dari config lamp
         $status = 0;
         // Contoh kasus
         // jam sekarang 9 malam
         // time_on = 7 Pagi
         // time_off = 8 Malam
-        if (\Carbon\Carbon::now() >= $configLamp->time_on && \Carbon\Carbon::now() <= $configLamp->time_off){
+        if (\Carbon\Carbon::now() >= $configLamp->time_on && \Carbon\Carbon::now() <= $configLamp->time_off) {
             // lampu nyala
             $status = 1;
         } else {
@@ -58,11 +59,18 @@ class MainController extends Controller
                 'humidity' => $request->humidity,
                 'light_intensity' => $request->light_intensity,
             ]);
+            MQTT::publish('/data', json_encode([
+                'device_id' => $deviceId,
+                'temperature' => $request->temperature,
+                'humidity' => $request->humidity,
+                'light_intensity' => $request->light_intensity,
+                'created_at' => $dataSensor->created_at
+            ]));
             return response()->json([
                 "status" => "Success",
                 "message" => "Data successfuly created",
             ], 201);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 "status" => "Error",
                 "message" => "Data error",

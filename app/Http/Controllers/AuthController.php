@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DataSensor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\DataSensor;
+use Mockery\Matcher\Type;
 
 class AuthController extends Controller
 {
@@ -27,7 +28,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'auth' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 
@@ -42,9 +43,9 @@ class AuthController extends Controller
         return redirect('/login');
     }
 
-    public function dashboard()
+    public function dashboard(Type $var = null)
     {
-        $dataSensor = DataSensor::orderBy('created_at','desc')->get();
+        $dataSensor = DataSensor::orderBy('created_at', 'desc')->get();
         return view('dashboard', compact('dataSensor'));
     }
 }

@@ -1,58 +1,91 @@
 @extends('layout.admin')
 
-@section('title', 'Config Heater | RoostControl')
-
+@section('title', 'Heater Config | RoostControl')
 
 @section('content')
 <div class="container-fluid">
     <div class="card">
         <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <h5 class="card-title fw-semibold mb-4">Manage Users</h5>
-                <div>
-                    <input type="radio" id="manual" name="mode" value="manual">
-                    <label for="manual">Manual</label>
+            <h5 class="card-title fw-semibold mb-4">Config Heater</h5>
+            <form action="{{ route('config.heater.update') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label for="select-device" class="form-label">Device<br>
+                        <span class="text-body-secondary fw-normal fs-2">Select the device whose configuration you want
+                            to change.</span></label>
+                    <select id="select-device" class="form-select" name="device_id" onchange="show(this.value)">
+                        @foreach ($devices as $item)
+                        <option value="{{ $item->id }}" @if ($loop->index == 0 || session('device_id') == $item->id) selected @endif>
+                            {{ $item->id }} - {{ $item->name }}
+                        </option>
+                        @endforeach
+                    </select>
                 </div>
-                <div>
-                    <input type="radio" id="auto" name="mode" value="auto">
-                    <label for="auto">Otomatis</label>
+                <div class="mb-3 d-inline-flex flex-column">
+                    <label for="radio-mode" class="form-label">
+                        Mode<br>
+                        <span class="text-body-secondary fw-normal fs-2">Change the heater mode to manual or
+                            automatic.</span>
+                    </label>
+                    <div class="btn-group" role="group" aria-label="Change mode" id="radio-mode">
+                        <input type="radio" class="btn-check" name="mode" id="radio-mode1" value="manual" autocomplete="off" @if ($config->mode == 'MANUAL') checked @endif>
+                        <label class="btn btn-outline-primary" for="radio-mode1">Manual</label>
+
+                        <input type="radio" class="btn-check" name="mode" id="radio-mode2" value="automatic" autocomplete="off" @if ($config->mode == 'AUTOMATIC') checked @endif>
+                        <label class="btn btn-outline-primary" for="radio-mode2">Automatic</label>
+                    </div>
                 </div>
-
-                <div id="manual-mode">
-                    <h3>Manual Mode</h3>
-                    <label for="switch">Switch:</label>
-                    <input type="checkbox" id="switch" name="switch">
+                <div id="mode-form">
+                    @if ($config->mode == 'AUTOMATIC')
+                    @include('content.config.heater.component.automatic-mode-form')
+                    @else
+                    @include('content.config.heater.component.manual-mode-form')
+                    @endif
                 </div>
-
-                <div id="auto-mode">
-                    <h3>Otomatis Mode</h3>
-                    <label for="max_temp">Max Temperature:</label>
-                    <input type="number" id="max_temp" name="max_temp">
-                    <br>
-                    <label for="min_temp">Min Temperature:</label>
-                    <input type="number" id="min_temp" name="min_temp">
-                    <br>
-                    <label for="max_temp_range">Max Temperature Range:</label>
-                    <input type="range" id="max_temp_range" name="max_temp_range" min="0" max="100">
-                    <br>
-                    <label for="min_temp_range">Min Temperature Range:</label>
-                    <input type="range" id="min_temp_range" name="min_temp_range" min="0" max="100">
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary d-flex align-items-center">
+                        <iconify-icon icon="solar:settings-bold" class="me-2" style="font-size:18px"></iconify-icon>
+                        Update Configuration</button>
                 </div>
-                </form>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
 
-                // Add JavaScript code to toggle the manual and auto mode sections
-                <script>
-                    $(document).ready(function() {
-                        $('input[name="mode"]').on('change', function() {
-                            if ($(this).val() == 'manual') {
-                                $('#manual-mode').show();
-                                $('#auto-mode').hide();
-                            } else {
-                                $('#manual-mode').hide();
-                                $('#auto-mode').show();
-                            }
-                        });
-                    });
-                </script>
+@push('js')
+<script>
+    $(document).ready(function() {
+        $("[name=mode]").change(function() {
+            let mode = $("[name=mode]:checked").val()
+            console.log(mode)
+            if (mode == 'manual') {
+                $('#mode-form').html(`@include('content.config.heater.component.manual-mode-form')`)
+            } else {
+                $('#mode-form').html(`@include('content.config.heater.component.automatic-mode-form')`)
+            }
+        })
+    })
 
-                @endsection
+    function show(id) {
+        $.post("{{ route('config.heater.show') }}", {
+            _token: '{{ csrf_token() }}',
+            device_id: id
+        }, function(response) {
+            if (response.mode.toLowerCase() == 'automatic') {
+                $("input[name=mode][value='automatic']").prop("checked", true);
+                $('#mode-form').html(`@include('content.config.heater.component.automatic-mode-form')`)
+            } else {
+                $("input[name=mode][value='manual']").prop("checked", true);
+                $('#mode-form').html(`@include('content.config.heater.component.manual-mode-form')`)
+            }
+            if (response.status == '1') {
+                $("input[name=status][value='1']").prop("checked", true);
+            } else {
+                $("input[name=status][value='0']").prop("checked", true);
+            }
+            console.log(response)
+        });
+    }
+</script>
+@endpush

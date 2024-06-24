@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('config_heaters', function (Blueprint $table) {
             $table->string('device_id');
             $table->foreign('device_id')->references('id')->on('devices');
-            $table->enum('mode',['MANUAL','AUTOMATIC'])->default('MANUAL');
+            $table->enum('mode', ['MANUAL', 'AUTOMATIC'])->default('MANUAL');
             $table->boolean('status')->default(0);
             $table->float('max_temp')->nullable();
             $table->float('min_temp')->nullable();
