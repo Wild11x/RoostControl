@@ -143,6 +143,101 @@
 <script src="{{ asset('libs/apexcharts/dist/apexcharts.min.js') }}"></script>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <script>
+    let chart; // global
+
+    /**
+     * Request data from the server, add it to the graph and set a timeout to
+     * request again
+     */
+    async function requestData(json) {
+        const data = JSON.parse(json)
+        const value = data.temperature;
+        const value1 = data.humidity;
+        const value2 = data.light_intensity;
+        const timestamp = data.created_at;
+        const point = [new Date(timestamp).getTime(), parseFloat(value)];
+        const point1 = [new Date(timestamp).getTime(), parseFloat(value1)];
+        const point2 = [new Date(timestamp).getTime(), parseFloat(value2)];
+        const series = chart.series[0],
+            shift = series.data.length > 20; // shift if the series is
+        const series1 = chart.series[0],
+            shift1 = series.data.length > 20; // shift if the series is
+        const series2 = chart.series[0],
+            shift2 = series.data.length > 20; // shift if the series is
+        // longer than 20
+
+        // add the point
+        chart.series[0].addPoint(point, true, shift);
+        chart.series[1].addPoint(point1, true, shift1);
+        chart.series[2].addPoint(point2, true, shift2);
+    }
+
+    window.addEventListener('load', function() {
+        setInterval(() => {
+            let temperature = (Math.random() * (30 - 15) + 15).toFixed(1);
+            let humidity = (Math.random() * (70 - 30) + 30).toFixed(1);
+            let lightIntensity = (Math.random() * (100 - 0) + 0).toFixed(1);
+            $.post("{{ url('/api/data/A001') }}", {
+                temperature: temperature,
+                humidity: humidity,
+                light_intensity: lightIntensity
+            }, function(response) {
+                console.log(response)
+            });
+        }, 5000);
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                type: 'areaspline',
+                events: {
+                    load: requestData
+                },
+                style: {
+                    fontFamily: 'inherit',
+                },
+                animation: {
+                    duration: 200
+                },
+                height: 300,
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150,
+                maxZoom: 20 * 1000,
+                labels: {
+                    style: {
+                        color: '#adb0bb'
+                    }
+                }
+            },
+            yAxis: {
+                title: null,
+                labels: {
+                    style: {
+                        color: '#adb0bb'
+                    }
+                }
+            },
+            series: [{
+                name: 'Temperature',
+                color: 'var(--bs-danger)',
+                fillOpacity: 0.1,
+            }, {
+                name: 'Humidity',
+                color: 'var(--bs-secondary)',
+                fillOpacity: 0.1,
+            }, {
+                name: 'Light Intensity',
+                color: 'var(--bs-primary)',
+                fillOpacity: 0.1,
+            }, ]
+        });
+    });
+</script>
+<script>
     $(document).ready(function() {
         // Mendefinisikan data sensor dari PHP
         var dataSensor = <?php echo json_encode($dataSensor); ?>;
@@ -200,43 +295,64 @@
         var sensorStatisticsChart = new ApexCharts(document.querySelector("#sensor-statistics-chart"), sensorStatisticsChartOptions);
         sensorStatisticsChart.render();
     });
-
+</script>
+<script>
     window.addEventListener('load', function() {
-        const url = 'mqtt://broker.emqx.io';
+        const url = 'wss://e6ef66ce.ala.asia-southeast1.emqxsl.com:8084/mqtt'
         const options = {
             clean: true,
             connectTimeout: 4000,
-            clientId: 'roostcontrol',
+            clientId: 'mqtt-panel-iot',
             username: 'admin',
             password: 'admin',
-        };
-        const client = mqtt.connect(url, options);
-
+            ca: `-----BEGIN CERTIFICATE-----
+    MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh
+    MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+    d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD
+    QTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT
+    MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+    b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG
+    9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB
+    CSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97
+    nh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt
+    43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P
+    T19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4
+    gdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO
+    BgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR
+    TLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw
+    DQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr
+    hMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg
+    06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF
+    PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls
+    YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
+    CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
+    -----END CERTIFICATE-----`
+        }
+        const client = mqtt.connect(url, options)
         client.on('connect', function() {
-            console.log('Connected');
+            console.log('Connected')
             client.subscribe('/data', function(err) {
-                console.log('subscribe to /data');
-            });
-        });
+                console.log('subscribe to /data')
+            })
+        })
 
         // Untuk mengambil pesan / message dari topic temperature
         client.on('message', async function(topic, message) {
-            if (topic === '/data') {
-                if (typeof message === 'object') {
-                    console.log(message.toString());
+            if (topic == '/data') {
+                if (typeof message == 'object') {
+                    console.log(message.toString())
                     const data = JSON.parse(message);
-
-                    // Update DOM elements
-                    $('#temp-value').html(data.temperature);
-                    $('#humi-value').html(data.humidity);
-                    $('#light-value').html(data.light_intensity);
-                    $('#temp-bar').css('width', `${data.temperature}%`);
-                    $('#humi-bar').css('width', `${data.humidity}%`);
-                    $('#light-bar').css('width', `${data.light_intensity}%`);
+                    $('#temp-value').html(data.temperature)
+                    $('#humi-value').html(data.humidity)
+                    $('#light-value').html(data.light_intensity)
+                    $('#temp-bar').css('width', `${data.temperature}%`)
+                    $('#humi-bar').css('width', `${data.humidity}%`)
+                    $('#light-bar').css('width', `${data.light_intensity}%`)
+                    await requestData(message)
                 }
             }
-        });
-    });
+        })
+    })
 </script>
 
 @endpush

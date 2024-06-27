@@ -101,11 +101,6 @@ $(function () {
         chart
     );
     chart.render();
-
-
-    // -----------------------------------------------------------------------
-    // Total Income
-    // -----------------------------------------------------------------------
     var customers = {
         chart: {
             id: "sparkline3",
@@ -146,7 +141,6 @@ $(function () {
     new ApexCharts(document.querySelector("#total-income"), customers).render();
 
 })
-
 
 // assume you have a function to retrieve data from the devices
 function getDataFromDevices() {
@@ -215,3 +209,5 @@ getDataFromDevices();
 
 // update the data periodically (e.g., every 1 second)
 setInterval(getDataFromDevices, 1000);
+
+
